@@ -8,16 +8,13 @@
         body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; }
         #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         
-        /* ส่วนหัว (เอาโลโก้ซ้ายบนออกแล้ว) */
         .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; }
         .header h2 { margin: 0; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
-        /* ส่วนป้ายโปรโมชั่น */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; }
         .promos img { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
         
-        /* ตะกร้าสินค้า */
         .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
         .card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.1s;}
         .card:active { transform: scale(0.95); }
@@ -25,7 +22,6 @@
         .title { font-size: 0.9em; margin: 10px 0 5px; height: 40px; overflow: hidden; }
         .price { color: #e46c0a; font-weight: bold; font-size: 1.1em; }
         
-        /* เพิ่ม Animation ให้หน้าจอ */
         .screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: white; display: none; flex-direction: column; z-index: 10; 
@@ -46,7 +42,6 @@
         .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
-        /* หน้า Processing ให้อนิเมทแบบ Fade-in */
         #processing-screen { 
             background: rgba(0,0,0,0.85); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
             animation: fadeIn 0.4s ease-out forwards;
@@ -69,8 +64,8 @@
 </head>
 <body>
 
-<!-- เพิ่มแท็ก Audio สำหรับเล่นเสียง -->
-<audio id="paySound" src="pay-sound.m4a"></audio>
+<!-- ดึงไฟล์เสียงมาใช้ -->
+<audio id="paySound" src="sound.mp3"></audio>
 
 <div id="kiosk">
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
@@ -80,8 +75,8 @@
         </div>
         
         <div class="promos">
-            <!-- ใส่รูปใหม่เข้าไปแทน -->
-            <img src="ad-image.jfif">
+            <!-- ดึงรูปใหม่ ถ้าหา ad.jfif ไม่เจอ จะดึง promo-711.png มาแสดงแทน -->
+            <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
             <img src="promo-allmember.jfif">
         </div>
 
@@ -153,7 +148,6 @@
 </div>
 
 <script>
-    // ดึง Element เสียงมาเก็บไว้
     const paySound = document.getElementById('paySound');
 
     function openPayment(itemName) {
@@ -202,9 +196,9 @@
                 document.getElementById('status-msg').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
                 
-                // เล่นเสียงตอนชำระเงินเสร็จ
+                // สั่งเล่นเสียงเมื่อเวลาหมด
                 paySound.currentTime = 0;
-                paySound.play();
+                paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียง"));
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
@@ -213,5 +207,7 @@
         }, 1000);
     }
 </script>
+</body>
+</html>
 </body>
 </html>
