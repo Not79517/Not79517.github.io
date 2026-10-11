@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-11 Kiosk Simulation</title>
+    <style>
+        body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; }
+        #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        
+        /* ส่วนหัว */
+        .header { background: #008040; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; color: white; }
+        .header img.logo { height: 40px; background: white; padding: 5px; border-radius: 5px; }
+        .header img.allmember { height: 30px; }
+        
+        /* ส่วนป้ายโปรโมชั่น */
+        .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; }
+        .promos img { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        
+        /* ตะกร้าสินค้า */
+        .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
+        .card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.1s;}
+        .card:active { transform: scale(0.95); }
+        .card img { width: 100%; height: 120px; object-fit: contain; }
+        .title { font-size: 0.9em; margin: 10px 0 5px; height: 40px; overflow: hidden; }
+        .price { color: #e46c0a; font-weight: bold; font-size: 1.1em; }
+        
+        /* หน้าชำระเงิน และ หน้าประมวลผล */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; flex-direction: column; z-index: 10; }
+        .screen-header { background: #e46c0a; color: white; padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; }
+        
+        .payment-methods { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .method-btn { display: flex; align-items: center; padding: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.2em; cursor: pointer; background: #fff; }
+        .method-btn img { height: 40px; margin-right: 20px; object-fit: contain; width: 60px; }
+        .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; }
+        
+        #processing-screen { background: rgba(0,0,0,0.85); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;}
+        #processing-screen img.qr { width: 250px; border-radius: 10px; margin: 20px; border: 10px solid white; display: none; }
+        .timer { font-size: 4em; color: #ffeb3b; font-weight: bold; margin: 20px 0; }
+        .message { font-size: 1.5em; margin: 20px; }
+        .success-text { font-size: 2.5em; color: #4caf50; font-weight: bold; display: none; }
+        
+        @media (max-width: 480px) {
+            .products { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="kiosk">
+    <!-- หน้าหลัก เลือกสินค้า -->
+    <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
+        <div class="header">
+            <img src="logo-711.jpg" onerror="this.onerror=null; this.src='logo-711.png';" class="logo" alt="7-11">
+            <h2>เลือกสินค้า</h2>
+            <img src="logo-allmember.jpg" onerror="this.onerror=null; this.src='logo-allmember.png';" class="allmember" alt="All Member">
+        </div>
+        
+        <div class="promos">
+            <img src="promo-711.jpg" onerror="this.onerror=null; this.src='promo-711.png';">
+            <img src="promo-allmember.jpg" onerror="this.onerror=null; this.src='promo-allmember.png';">
+        </div>
+
+        <div class="products">
+            <div class="card" onclick="openPayment('เลย์ รสออริจินัล')">
+                <img src="lays-yellow.jpg" onerror="this.onerror=null; this.src='lays-yellow.png';">
+                <div class="title">เลย์ รสออริจินัล</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('คอนเน่')">
+                <img src="cornae.jpg" onerror="this.onerror=null; this.src='cornae.png';">
+                <div class="title">คอนเน่</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('โลตัสขาไก่')">
+                <img src="lotus.jpg" onerror="this.onerror=null; this.src='lotus.png';">
+                <div class="title">โลตัสขาไก่</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('โอริโอ้')">
+                <img src="oreo.jpg" onerror="this.onerror=null; this.src='oreo.png';">
+                <div class="title">โอริโอ้</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('เลย์ รสโนริสาหร่าย')">
+                <img src="lays-green.jpg" onerror="this.onerror=null; this.src='lays-green.png';">
+                <div class="title">เลย์ รสโนริสาหร่าย</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('โดโซะ')">
+                <img src="dozo.jpg" onerror="this.onerror=null; this.src='dozo.png';">
+                <div class="title">โดโซะ</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('บันบัน')">
+                <img src="bunbun.jpg" onerror="this.onerror=null; this.src='bunbun.png';">
+                <div class="title">บันบัน</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('ล็อคเกอร์')">
+                <img src="loacker.jpg" onerror="this.onerror=null; this.src='loacker.png';">
+                <div class="title">ล็อคเกอร์</div><div class="price">10 บาท</div>
+            </div>
+            <div class="card" onclick="openPayment('แคมปัส')">
+                <img src="campus.jpg" onerror="this.onerror=null; this.src='campus.png';">
+                <div class="title">แคมปัส</div><div class="price">10 บาท</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าต่างเลือกช่องทางชำระเงิน -->
+    <div id="payment-screen" class="screen">
+        <div class="screen-header">ยอดชำระ: 10 บาท <br><small id="selected-item-name"></small></div>
+        <div class="payment-methods">
+            <div class="method-btn" onclick="startProcess('cash')">
+                <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" style="width:40px; margin-left:10px;">
+                เงินสด
+            </div>
+            <div class="method-btn" onclick="startProcess('truemoney')">
+                <img src="logo-truemoney.jpg" onerror="this.onerror=null; this.src='logo-truemoney.png';">
+                TrueMoney
+            </div>
+            <div class="method-btn" onclick="startProcess('visa')">
+                <img src="logo-visa.jpg" onerror="this.onerror=null; this.src='logo-visa.png';">
+                บัตร VISA
+            </div>
+        </div>
+        <div class="back-btn" onclick="goBack()">ย้อนกลับ</div>
+    </div>
+
+    <!-- หน้าต่างประมวลผล (นับถอยหลัง) -->
+    <div id="processing-screen" class="screen">
+        <div id="status-msg" class="message">กรุณาชำระเงิน</div>
+        <img src="qr-code.jpg" onerror="this.onerror=null; this.src='qr-code.png';" id="qr-display" class="qr">
+        <div id="timer-display" class="timer">8</div>
+        <div id="success-msg" class="success-text">รับสินค้าที่ช่องรับสินค้า</div>
+    </div>
+</div>
+
+<script>
+    function openPayment(itemName) {
+        document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('payment-screen').style.display = 'flex';
+    }
+
+    function goBack() {
+        document.getElementById('payment-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'flex';
+    }
+
+    function startProcess(method) {
+        document.getElementById('payment-screen').style.display = 'none';
+        document.getElementById('processing-screen').style.display = 'flex';
+        
+        let waitTime = 8; // เวลาเริ่มต้น 8 วินาที
+        
+        // เช็คว่าจ่ายแบบไหน
+        if (method === 'cash') {
+            document.getElementById('status-msg').innerText = "กรุณาใส่ธนบัตรหรือเหรียญ";
+            document.getElementById('qr-display').style.display = 'none';
+        } else {
+            document.getElementById('status-msg').innerText = "กรุณาสแกนเพื่อชำระเงิน";
+            document.getElementById('qr-display').style.display = 'block';
+            waitTime = 13; // เพิ่มเป็น 13 วิ สำหรับ TrueMoney / Visa
+        }
+        
+        document.getElementById('timer-display').style.display = 'block';
+        document.getElementById('status-msg').style.display = 'block';
+        document.getElementById('success-msg').style.display = 'none';
+        
+        document.getElementById('timer-display').innerText = waitTime;
+        
+        // เริ่มนับถอยหลัง
+        let countdown = setInterval(() => {
+            waitTime--;
+            document.getElementById('timer-display').innerText = waitTime;
+            
+            if (waitTime <= 0) {
+                clearInterval(countdown); // หยุดเวลา
+                document.getElementById('timer-display').style.display = 'none';
+                document.getElementById('qr-display').style.display = 'none';
+                document.getElementById('status-msg').style.display = 'none';
+                
+                // โชว์ข้อความสำเร็จ
+                document.getElementById('success-msg').style.display = 'block';
+                
+                // ค้างไว้ 3 วินาที แล้วกลับหน้าแรก
+                setTimeout(() => {
+                    document.getElementById('processing-screen').style.display = 'none';
+                    document.getElementById('main-screen').style.display = 'flex';
+                }, 3000);
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>
