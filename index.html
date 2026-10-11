@@ -12,7 +12,7 @@
         .header h2 { margin: 0; font-size: 1.5em; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
-        /* แก้ไขส่วนโปรโมชั่น: ล็อคขนาดวิดีโอไม่ให้โดนบีบหายไป */
+        /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; }
         .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; flex-shrink: 0; }
         .promos video { width: 220px; background-color: #222; }
@@ -44,6 +44,7 @@
         .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
+        /* หน้า Processing แบบใหม่ */
         #processing-screen { 
             background: rgba(30,30,30,0.95); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
             animation: fadeIn 0.4s ease-out forwards;
@@ -59,6 +60,7 @@
         .message { font-size: 1.5em; margin: 10px; }
         .success-text { font-size: 2.5em; color: #4caf50; font-weight: bold; display: none; }
         
+        /* กรอบโชว์สินค้าที่กำลังโหลด (สีแดง) */
         .loading-product-box {
             background: rgba(255, 0, 0, 0.1);
             border: 3px solid #ff3b3b;
@@ -72,6 +74,7 @@
         .loading-product-box img { height: 100px; object-fit: contain; }
         .loading-product-box p { margin: 10px 0 0 0; color: #ffeb3b; font-size: 1.2em; font-weight: bold; }
 
+        /* วิดีโอแถบโหลด */
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
         @media (max-width: 480px) {
@@ -81,7 +84,9 @@
 </head>
 <body>
 
+<!-- แหล่งรวมไฟล์เสียง -->
 <audio id="paySound" src="sound.mp3"></audio>
+<audio id="thxSound" src="thx.mp3"></audio>
 
 <div id="kiosk">
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
@@ -94,7 +99,7 @@
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
             <img src="promo-allmember.jfif">
             
-            <!-- วิดีโอโฆษณา -->
+            <!-- วิดีโอโฆษณาเล่นวนลูป -->
             <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
         </div>
 
@@ -176,9 +181,16 @@
 
 <script>
     const paySound = document.getElementById('paySound');
+    const thxSound = document.getElementById('thxSound');
     const adVideo = document.getElementById('adVideo');
     const loadingVideo = document.getElementById('loading-video-player');
     
+    // ตั้งค่าให้เล่นเสียงขอบคุณต่อจากเสียงจ่ายเงินสำเร็จทันที
+    paySound.onended = function() {
+        thxSound.currentTime = 0;
+        thxSound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียงขอบคุณ"));
+    };
+
     let currentSelectedItemImg = "";
 
     function openPayment(itemName, itemImage) {
@@ -225,7 +237,7 @@
         }
         
         loadingVideo.currentTime = 0;
-        loadingVideo.play().catch(e => console.log("โหลดวิดีโอ..."));
+        loadingVideo.play().catch(e => console.log("โหลดวิดีโอโหลดหน้าจอ..."));
         
         document.getElementById('timer-display').style.display = 'block';
         document.getElementById('status-msg').style.display = 'block';
@@ -246,6 +258,7 @@
                 
                 document.getElementById('success-msg').style.display = 'block';
                 
+                // เริ่มเล่นเสียงคิดเงิน (เสียงขอบคุณจะเล่นต่ออัตโนมัติ)
                 paySound.currentTime = 0;
                 paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้"));
                 
@@ -256,7 +269,7 @@
                         adVideo.currentTime = 0;
                         adVideo.play();
                     }
-                }, 3000);
+                }, 4000); // เผื่อเวลาให้เสียงขอบคุณเล่นจบก่อนกลับหน้าแรก
             }
         }, 1000);
     }
