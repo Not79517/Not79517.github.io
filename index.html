@@ -93,13 +93,17 @@
         </div>
         
         <div class="promos">
-            <!-- วิดีโอโฆษณาม่อนชิชิเล่นวนลูปตรงนี้ -->
-            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline style="width: 200px;"></video>
+            <!-- 1. รูปโฆษณาอันเก่า (กันเหนียว ดึงได้ทั้ง ad.jfif และ promo-711.png) -->
+            <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
+            
+            <!-- 2. รูปชินจัง -->
             <img src="promo-allmember.jfif">
+            
+            <!-- 3. วิดีโอโฆษณาม่อนชิชิ -->
+            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
         </div>
 
         <div class="products">
-            <!-- เพิ่มการส่งชื่อไฟล์รูปภาพเข้าไปในฟังก์ชัน openPayment -->
             <div class="card" onclick="openPayment('เลย์ รสออริจินัล', 'lays-yellow.png')">
                 <img src="lays-yellow.png">
                 <div class="title">เลย์ รสออริจินัล</div><div class="price">10 บาท</div>
@@ -182,26 +186,23 @@
     const adVideo = document.getElementById('adVideo');
     const loadingVideo = document.getElementById('loading-video-player');
     
-    // ตัวแปรเก็บรูปสินค้าที่ลูกค้ากด
     let currentSelectedItemImg = "";
 
     function openPayment(itemName, itemImage) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
-        currentSelectedItemImg = itemImage; // จำรูปสินค้าไว้
+        currentSelectedItemImg = itemImage; 
         
         document.getElementById('main-screen').style.display = 'none';
         document.getElementById('payment-screen').style.display = 'flex';
         
-        // หยุดเล่นโฆษณาเมื่อเข้าหน้าชำระเงิน
-        adVideo.pause();
+        if (adVideo) { adVideo.pause(); }
     }
 
     function goBack() {
         document.getElementById('payment-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'flex';
         
-        // กลับมาเล่นโฆษณาต่อ
-        adVideo.play();
+        if (adVideo) { adVideo.play(); }
     }
 
     function startProcess(method) {
@@ -215,7 +216,6 @@
         
         let waitTime = 8;
         
-        // เอารูปสินค้าที่ลูกค้าเลือกมาแสดงในกรอบสีแดง
         document.getElementById('loading-product-img').src = currentSelectedItemImg;
         document.getElementById('loading-product-box').style.display = 'flex';
         loadingVideo.style.display = 'block';
@@ -223,15 +223,14 @@
         if (method === 'cash') {
             document.getElementById('status-msg').innerText = "กำลังประมวลผล (เงินสด)";
             document.getElementById('qr-display').style.display = 'none';
-            loadingVideo.src = "load-8s.mp4"; // ใช้วิดีโอโหลด 8 วิ
+            loadingVideo.src = "load-8s.mp4"; 
         } else {
             document.getElementById('status-msg').innerText = "กรุณาสแกน QR เพื่อชำระเงิน";
             document.getElementById('qr-display').style.display = 'block';
             waitTime = 13;
-            loadingVideo.src = "load-13s.mp4"; // ใช้วิดีโอโหลด 13 วิ
+            loadingVideo.src = "load-13s.mp4"; 
         }
         
-        // เริ่มเล่นวิดีโอโหลดรูปรถ
         loadingVideo.currentTime = 0;
         loadingVideo.play();
         
@@ -254,20 +253,22 @@
                 
                 document.getElementById('success-msg').style.display = 'block';
                 
-                // เล่นเสียงสำเร็จ
                 paySound.currentTime = 0;
                 paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้"));
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
                     document.getElementById('main-screen').style.display = 'flex';
-                    // กลับสู่หน้าแรกและให้โฆษณาเริ่มเล่นใหม่
-                    adVideo.currentTime = 0;
-                    adVideo.play();
+                    if (adVideo) {
+                        adVideo.currentTime = 0;
+                        adVideo.play();
+                    }
                 }, 3000);
             }
         }, 1000);
     }
 </script>
+</body>
+</html>
 </body>
 </html>
