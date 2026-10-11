@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>7-11 Kiosk Simulation</title>
     <style>
-        body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; overflow: hidden; /* ป้องกันการเลื่อนหน้าจอทั้งหน้า */ }
+        body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; overflow: hidden; }
         #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); overflow: hidden; }
         
         .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; flex-shrink: 0; }
@@ -15,7 +15,6 @@
         /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; flex-shrink: 0; }
         .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; flex-shrink: 0; }
-        /* บังคับขนาดวิดีโอให้คงที่เพื่อแก้ปัญหากล่องดำ */
         .promos video { width: 220px; min-width: 220px; background-color: #222; } 
         
         .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
@@ -78,15 +77,6 @@
         /* วิดีโอแถบโหลด */
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
-        /* หน้าจอเริ่มต้น (แก้ปัญหา Autoplay) */
-        #start-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #008040; color: white; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 30; cursor: pointer;
-        }
-        #start-screen h1 { font-size: 2em; margin-bottom: 20px; }
-        #start-screen p { font-size: 1.2em; border: 2px solid white; padding: 10px 20px; border-radius: 20px; }
-
         @media (max-width: 480px) {
             .products { grid-template-columns: repeat(2, 1fr); }
         }
@@ -94,17 +84,10 @@
 </head>
 <body>
 
-<!-- แหล่งรวมไฟล์เสียง -->
 <audio id="paySound" src="sound.mp3"></audio>
 <audio id="thxSound" src="thx.mp3"></audio>
 
 <div id="kiosk">
-    <!-- หน้าจอเริ่มต้นเพื่อแก้ปัญหาเบราว์เซอร์บล็อกการเล่นสื่ออัตโนมัติ -->
-    <div id="start-screen" onclick="startApp()">
-        <h1>ยินดีต้อนรับสู่ 7-11</h1>
-        <p>แตะที่นี่เพื่อเริ่มใช้งาน</p>
-    </div>
-
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
             <h2>เลือกสินค้า</h2>
@@ -115,8 +98,8 @@
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
             <img src="promo-allmember.jfif" onerror="this.onerror=null; this.src='';">
             
-            <!-- วิดีโอโฆษณาเล่นวนลูป (เพิ่ม playsinline สำคัญมากสำหรับมือถือ) -->
-            <video id="adVideo" src="ad-video.mp4" loop muted playsinline></video>
+            <!-- วิดีโอโฆษณาเล่นวนลูปอัตโนมัติแบบปิดเสียง -->
+            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
         </div>
 
         <div class="products">
@@ -208,37 +191,6 @@
     };
 
     let currentSelectedItemImg = "";
-
-    // ฟังก์ชันเริ่มแอป (แก้ปัญหาเรื่อง Autoplay)
-    function startApp() {
-        document.getElementById('start-screen').style.display = 'none';
-        
-        // บังคับให้วิดีโอโฆษณาโหลดและเล่น
-        if (adVideo) {
-            adVideo.load();
-            let playPromise = adVideo.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("วิดีโอโฆษณาอาจถูกบล็อกโดยเบราว์เซอร์:", error);
-                });
-            }
-        }
-
-        // ดึงเสียงมาเล่นแบบเงียบๆ ครั้งหนึ่งเพื่อให้ปลดล็อกระบบเสียง
-        paySound.volume = 0;
-        paySound.play().then(() => {
-            paySound.pause();
-            paySound.currentTime = 0;
-            paySound.volume = 1;
-        }).catch(e => console.log(e));
-        
-        thxSound.volume = 0;
-        thxSound.play().then(() => {
-            thxSound.pause();
-            thxSound.currentTime = 0;
-            thxSound.volume = 1;
-        }).catch(e => console.log(e));
-    }
 
     function openPayment(itemName, itemImage) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
