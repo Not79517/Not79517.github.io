@@ -9,11 +9,12 @@
         #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         
         .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; }
-        .header h2 { margin: 0; }
+        .header h2 { margin: 0; font-size: 1.5em; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
-        .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; }
-        .promos img { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
+        .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; }
+        .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; }
         
         .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
         .card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.1s;}
@@ -42,8 +43,9 @@
         .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
+        /* หน้า Processing แบบใหม่ */
         #processing-screen { 
-            background: rgba(0,0,0,0.85); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
+            background: rgba(30,30,30,0.95); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
             animation: fadeIn 0.4s ease-out forwards;
         }
 
@@ -52,10 +54,27 @@
             to { opacity: 1; }
         }
 
-        #processing-screen img.qr { width: 250px; border-radius: 10px; margin: 20px; border: 10px solid white; display: none; }
-        .timer { font-size: 4em; color: #ffeb3b; font-weight: bold; margin: 20px 0; }
-        .message { font-size: 1.5em; margin: 20px; }
+        #processing-screen img.qr { width: 200px; border-radius: 10px; margin: 10px; border: 10px solid white; display: none; }
+        .timer { font-size: 5em; color: #ffeb3b; font-weight: bold; margin: 10px 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .message { font-size: 1.5em; margin: 10px; }
         .success-text { font-size: 2.5em; color: #4caf50; font-weight: bold; display: none; }
+        
+        /* กรอบโชว์สินค้าที่กำลังโหลด (สีแดง) */
+        .loading-product-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 3px solid #ff3b3b;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .loading-product-box img { height: 100px; object-fit: contain; }
+        .loading-product-box p { margin: 10px 0 0 0; color: #ffeb3b; font-size: 1.2em; font-weight: bold; }
+
+        /* วิดีโอแถบโหลด */
+        #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
         @media (max-width: 480px) {
             .products { grid-template-columns: repeat(2, 1fr); }
@@ -64,7 +83,6 @@
 </head>
 <body>
 
-<!-- ดึงไฟล์เสียงมาใช้ -->
 <audio id="paySound" src="sound.mp3"></audio>
 
 <div id="kiosk">
@@ -75,45 +93,46 @@
         </div>
         
         <div class="promos">
-            <!-- ดึงรูปใหม่ ถ้าหา ad.jfif ไม่เจอ จะดึง promo-711.png มาแสดงแทน -->
-            <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
+            <!-- วิดีโอโฆษณาม่อนชิชิเล่นวนลูปตรงนี้ -->
+            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline style="width: 200px;"></video>
             <img src="promo-allmember.jfif">
         </div>
 
         <div class="products">
-            <div class="card" onclick="openPayment('เลย์ รสออริจินัล')">
+            <!-- เพิ่มการส่งชื่อไฟล์รูปภาพเข้าไปในฟังก์ชัน openPayment -->
+            <div class="card" onclick="openPayment('เลย์ รสออริจินัล', 'lays-yellow.png')">
                 <img src="lays-yellow.png">
                 <div class="title">เลย์ รสออริจินัล</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('คอนเน่')">
+            <div class="card" onclick="openPayment('คอนเน่', 'cornae.jfif')">
                 <img src="cornae.jfif">
                 <div class="title">คอนเน่</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('โลตัสขาไก่')">
+            <div class="card" onclick="openPayment('โลตัสขาไก่', 'lotus.jfif')">
                 <img src="lotus.jfif">
                 <div class="title">โลตัสขาไก่</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('โอริโอ้')">
+            <div class="card" onclick="openPayment('โอริโอ้', 'oreo.png')">
                 <img src="oreo.png">
                 <div class="title">โอริโอ้</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('เลย์ รสโนริสาหร่าย')">
+            <div class="card" onclick="openPayment('เลย์ รสโนริสาหร่าย', 'lays-green.jfif')">
                 <img src="lays-green.jfif">
                 <div class="title">เลย์ รสโนริสาหร่าย</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('โดโซะ')">
+            <div class="card" onclick="openPayment('โดโซะ', 'dozo.jfif')">
                 <img src="dozo.jfif">
                 <div class="title">โดโซะ</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('บันบัน')">
+            <div class="card" onclick="openPayment('บันบัน', 'bunbun.jfif')">
                 <img src="bunbun.jfif">
                 <div class="title">บันบัน</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('ล็อคเกอร์')">
+            <div class="card" onclick="openPayment('ล็อคเกอร์', 'loacker.png')">
                 <img src="loacker.png">
                 <div class="title">ล็อคเกอร์</div><div class="price">10 บาท</div>
             </div>
-            <div class="card" onclick="openPayment('แคมปัส')">
+            <div class="card" onclick="openPayment('แคมปัส', 'campus.jfif')">
                 <img src="campus.jfif">
                 <div class="title">แคมปัส</div><div class="price">10 บาท</div>
             </div>
@@ -142,21 +161,47 @@
     <div id="processing-screen" class="screen">
         <div id="status-msg" class="message">กรุณาชำระเงิน</div>
         <img src="qr-code.jfif" id="qr-display" class="qr">
+        
+        <!-- กรอบโชว์สินค้าที่เลือก (สีแดง) -->
+        <div class="loading-product-box" id="loading-product-box" style="display: none;">
+            <img id="loading-product-img" src="">
+            <p>สินค้ากำลังจัดเตรียม...</p>
+        </div>
+
         <div id="timer-display" class="timer">8</div>
+        
+        <!-- แถบวิดีโอโหลดรถมอเตอร์ไซค์ -->
+        <video id="loading-video-player" muted playsinline></video>
+
         <div id="success-msg" class="success-text">รับสินค้าที่ช่องรับสินค้า</div>
     </div>
 </div>
 
 <script>
     const paySound = document.getElementById('paySound');
+    const adVideo = document.getElementById('adVideo');
+    const loadingVideo = document.getElementById('loading-video-player');
+    
+    // ตัวแปรเก็บรูปสินค้าที่ลูกค้ากด
+    let currentSelectedItemImg = "";
 
-    function openPayment(itemName) {
+    function openPayment(itemName, itemImage) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
+        currentSelectedItemImg = itemImage; // จำรูปสินค้าไว้
+        
+        document.getElementById('main-screen').style.display = 'none';
         document.getElementById('payment-screen').style.display = 'flex';
+        
+        // หยุดเล่นโฆษณาเมื่อเข้าหน้าชำระเงิน
+        adVideo.pause();
     }
 
     function goBack() {
         document.getElementById('payment-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'flex';
+        
+        // กลับมาเล่นโฆษณาต่อ
+        adVideo.play();
     }
 
     function startProcess(method) {
@@ -166,19 +211,29 @@
         processScreen.style.animation = 'none';
         processScreen.offsetHeight; 
         processScreen.style.animation = null; 
-        
         processScreen.style.display = 'flex';
         
         let waitTime = 8;
         
+        // เอารูปสินค้าที่ลูกค้าเลือกมาแสดงในกรอบสีแดง
+        document.getElementById('loading-product-img').src = currentSelectedItemImg;
+        document.getElementById('loading-product-box').style.display = 'flex';
+        loadingVideo.style.display = 'block';
+
         if (method === 'cash') {
-            document.getElementById('status-msg').innerText = "กรุณาใส่ธนบัตรหรือเหรียญ";
+            document.getElementById('status-msg').innerText = "กำลังประมวลผล (เงินสด)";
             document.getElementById('qr-display').style.display = 'none';
+            loadingVideo.src = "load-8s.mp4"; // ใช้วิดีโอโหลด 8 วิ
         } else {
-            document.getElementById('status-msg').innerText = "กรุณาสแกนเพื่อชำระเงิน";
+            document.getElementById('status-msg').innerText = "กรุณาสแกน QR เพื่อชำระเงิน";
             document.getElementById('qr-display').style.display = 'block';
             waitTime = 13;
+            loadingVideo.src = "load-13s.mp4"; // ใช้วิดีโอโหลด 13 วิ
         }
+        
+        // เริ่มเล่นวิดีโอโหลดรูปรถ
+        loadingVideo.currentTime = 0;
+        loadingVideo.play();
         
         document.getElementById('timer-display').style.display = 'block';
         document.getElementById('status-msg').style.display = 'block';
@@ -194,20 +249,25 @@
                 document.getElementById('timer-display').style.display = 'none';
                 document.getElementById('qr-display').style.display = 'none';
                 document.getElementById('status-msg').style.display = 'none';
+                document.getElementById('loading-product-box').style.display = 'none';
+                loadingVideo.style.display = 'none';
+                
                 document.getElementById('success-msg').style.display = 'block';
                 
-                // สั่งเล่นเสียงเมื่อเวลาหมด
+                // เล่นเสียงสำเร็จ
                 paySound.currentTime = 0;
-                paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียง"));
+                paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้"));
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
+                    document.getElementById('main-screen').style.display = 'flex';
+                    // กลับสู่หน้าแรกและให้โฆษณาเริ่มเล่นใหม่
+                    adVideo.currentTime = 0;
+                    adVideo.play();
                 }, 3000);
             }
         }, 1000);
     }
 </script>
-</body>
-</html>
 </body>
 </html>
