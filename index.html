@@ -48,60 +48,58 @@
 <body>
 
 <div id="kiosk">
-    <!-- หน้าหลัก เลือกสินค้า -->
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
-            <img src="logo-711.jpg" onerror="this.onerror=null; this.src='logo-711.png';" class="logo" alt="7-11">
+            <img src="logo-711.png" class="logo" alt="7-11">
             <h2>เลือกสินค้า</h2>
-            <img src="logo-allmember.jpg" onerror="this.onerror=null; this.src='logo-allmember.png';" class="allmember" alt="All Member">
+            <img src="logo-allmember.png" class="allmember" alt="All Member">
         </div>
         
         <div class="promos">
-            <img src="promo-711.jpg" onerror="this.onerror=null; this.src='promo-711.png';">
-            <img src="promo-allmember.jpg" onerror="this.onerror=null; this.src='promo-allmember.png';">
+            <img src="promo-711.png" onerror="this.onerror=null; this.src='promo-711.jfif';">
+            <img src="promo-allmember.jfif">
         </div>
 
         <div class="products">
             <div class="card" onclick="openPayment('เลย์ รสออริจินัล')">
-                <img src="lays-yellow.jpg" onerror="this.onerror=null; this.src='lays-yellow.png';">
+                <img src="lays-yellow.png">
                 <div class="title">เลย์ รสออริจินัล</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('คอนเน่')">
-                <img src="cornae.jpg" onerror="this.onerror=null; this.src='cornae.png';">
+                <img src="cornae.jfif">
                 <div class="title">คอนเน่</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('โลตัสขาไก่')">
-                <img src="lotus.jpg" onerror="this.onerror=null; this.src='lotus.png';">
+                <img src="lotus.jfif">
                 <div class="title">โลตัสขาไก่</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('โอริโอ้')">
-                <img src="oreo.jpg" onerror="this.onerror=null; this.src='oreo.png';">
+                <img src="oreo.png">
                 <div class="title">โอริโอ้</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('เลย์ รสโนริสาหร่าย')">
-                <img src="lays-green.jpg" onerror="this.onerror=null; this.src='lays-green.png';">
+                <img src="lays-green.jfif">
                 <div class="title">เลย์ รสโนริสาหร่าย</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('โดโซะ')">
-                <img src="dozo.jpg" onerror="this.onerror=null; this.src='dozo.png';">
+                <img src="dozo.jfif">
                 <div class="title">โดโซะ</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('บันบัน')">
-                <img src="bunbun.jpg" onerror="this.onerror=null; this.src='bunbun.png';">
+                <img src="bunbun.jfif">
                 <div class="title">บันบัน</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('ล็อคเกอร์')">
-                <img src="loacker.jpg" onerror="this.onerror=null; this.src='loacker.png';">
+                <img src="loacker.png">
                 <div class="title">ล็อคเกอร์</div><div class="price">10 บาท</div>
             </div>
             <div class="card" onclick="openPayment('แคมปัส')">
-                <img src="campus.jpg" onerror="this.onerror=null; this.src='campus.png';">
+                <img src="campus.jfif">
                 <div class="title">แคมปัส</div><div class="price">10 บาท</div>
             </div>
         </div>
     </div>
 
-    <!-- หน้าต่างเลือกช่องทางชำระเงิน -->
     <div id="payment-screen" class="screen">
         <div class="screen-header">ยอดชำระ: 10 บาท <br><small id="selected-item-name"></small></div>
         <div class="payment-methods">
@@ -110,21 +108,20 @@
                 เงินสด
             </div>
             <div class="method-btn" onclick="startProcess('truemoney')">
-                <img src="logo-truemoney.jpg" onerror="this.onerror=null; this.src='logo-truemoney.png';">
+                <img src="logo-truemoney.png">
                 TrueMoney
             </div>
             <div class="method-btn" onclick="startProcess('visa')">
-                <img src="logo-visa.jpg" onerror="this.onerror=null; this.src='logo-visa.png';">
+                <img src="logo-visa.png">
                 บัตร VISA
             </div>
         </div>
         <div class="back-btn" onclick="goBack()">ย้อนกลับ</div>
     </div>
 
-    <!-- หน้าต่างประมวลผล (นับถอยหลัง) -->
     <div id="processing-screen" class="screen">
         <div id="status-msg" class="message">กรุณาชำระเงิน</div>
-        <img src="qr-code.jpg" onerror="this.onerror=null; this.src='qr-code.png';" id="qr-display" class="qr">
+        <img src="qr-code.jfif" id="qr-display" class="qr">
         <div id="timer-display" class="timer">8</div>
         <div id="success-msg" class="success-text">รับสินค้าที่ช่องรับสินค้า</div>
     </div>
@@ -146,39 +143,33 @@
         document.getElementById('payment-screen').style.display = 'none';
         document.getElementById('processing-screen').style.display = 'flex';
         
-        let waitTime = 8; // เวลาเริ่มต้น 8 วินาที
+        let waitTime = 8;
         
-        // เช็คว่าจ่ายแบบไหน
         if (method === 'cash') {
             document.getElementById('status-msg').innerText = "กรุณาใส่ธนบัตรหรือเหรียญ";
             document.getElementById('qr-display').style.display = 'none';
         } else {
             document.getElementById('status-msg').innerText = "กรุณาสแกนเพื่อชำระเงิน";
             document.getElementById('qr-display').style.display = 'block';
-            waitTime = 13; // เพิ่มเป็น 13 วิ สำหรับ TrueMoney / Visa
+            waitTime = 13;
         }
         
         document.getElementById('timer-display').style.display = 'block';
         document.getElementById('status-msg').style.display = 'block';
         document.getElementById('success-msg').style.display = 'none';
-        
         document.getElementById('timer-display').innerText = waitTime;
         
-        // เริ่มนับถอยหลัง
         let countdown = setInterval(() => {
             waitTime--;
             document.getElementById('timer-display').innerText = waitTime;
             
             if (waitTime <= 0) {
-                clearInterval(countdown); // หยุดเวลา
+                clearInterval(countdown);
                 document.getElementById('timer-display').style.display = 'none';
                 document.getElementById('qr-display').style.display = 'none';
                 document.getElementById('status-msg').style.display = 'none';
-                
-                // โชว์ข้อความสำเร็จ
                 document.getElementById('success-msg').style.display = 'block';
                 
-                // ค้างไว้ 3 วินาที แล้วกลับหน้าแรก
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
                     document.getElementById('main-screen').style.display = 'flex';
