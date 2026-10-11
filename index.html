@@ -25,16 +25,39 @@
         .title { font-size: 0.9em; margin: 10px 0 5px; height: 40px; overflow: hidden; }
         .price { color: #e46c0a; font-weight: bold; font-size: 1.1em; }
         
-        /* หน้าชำระเงิน และ หน้าประมวลผล */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; flex-direction: column; z-index: 10; }
+        /* เพิ่ม Animation ให้หน้าจอ */
+        .screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; display: none; flex-direction: column; z-index: 10; 
+            /* กำหนดให้ตอนโผล่มามี effect เลื่อนจากขวามาซ้าย และค่อยๆ ชัดขึ้น */
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         .screen-header { background: #e46c0a; color: white; padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; }
         
         .payment-methods { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .method-btn { display: flex; align-items: center; padding: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.2em; cursor: pointer; background: #fff; }
+        .method-btn { display: flex; align-items: center; padding: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.2em; cursor: pointer; background: #fff; transition: 0.1s;}
+        .method-btn:active { transform: scale(0.98); background: #f0f0f0;}
         .method-btn img { height: 40px; margin-right: 20px; object-fit: contain; width: 60px; }
-        .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; }
+        .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
+        .back-btn:active { transform: scale(0.98); background: #777;}
         
-        #processing-screen { background: rgba(0,0,0,0.85); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;}
+        /* หน้า Processing ให้อนิเมทแบบ Fade-in */
+        #processing-screen { 
+            background: rgba(0,0,0,0.85); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         #processing-screen img.qr { width: 250px; border-radius: 10px; margin: 20px; border: 10px solid white; display: none; }
         .timer { font-size: 4em; color: #ffeb3b; font-weight: bold; margin: 20px 0; }
         .message { font-size: 1.5em; margin: 20px; }
@@ -50,7 +73,8 @@
 <div id="kiosk">
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
-            <img src="<img src="[https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/1024px-7-eleven_logo.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/1024px-7-eleven_logo.svg.png)" class="logo" alt="7-11">" class="logo" alt="7-11">
+            <!-- แก้ไขรูป 7-11 ตรงนี้ให้สมบูรณ์ -->
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/1024px-7-eleven_logo.svg.png" class="logo" alt="7-11">
             <h2>เลือกสินค้า</h2>
             <img src="logo-allmember.png" class="allmember" alt="All Member">
         </div>
@@ -130,18 +154,27 @@
 <script>
     function openPayment(itemName) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
-        document.getElementById('main-screen').style.display = 'none';
+        
+        // ทำให้หน้าใหม่แสดงผล (มันจะมีอนิเมชั่นเลื่อนเข้ามาอัตโนมัติเพราะ CSS)
         document.getElementById('payment-screen').style.display = 'flex';
     }
 
     function goBack() {
+        // ปิดหน้าชำระเงิน กลับไปหน้าหลัก
         document.getElementById('payment-screen').style.display = 'none';
-        document.getElementById('main-screen').style.display = 'flex';
     }
 
     function startProcess(method) {
+        // ซ่อนหน้าชำระเงิน และเปิดหน้า QR/ประมวลผล (จะค่อยๆ สว่างขึ้นมา)
         document.getElementById('payment-screen').style.display = 'none';
-        document.getElementById('processing-screen').style.display = 'flex';
+        
+        // ลบอนิเมชั่นเก่าก่อน เพื่อให้มันเล่นซ้ำได้ถ้ากดหลายรอบ
+        let processScreen = document.getElementById('processing-screen');
+        processScreen.style.animation = 'none';
+        processScreen.offsetHeight; /* Trigger reflow */
+        processScreen.style.animation = null; 
+        
+        processScreen.style.display = 'flex';
         
         let waitTime = 8;
         
@@ -172,7 +205,6 @@
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
-                    document.getElementById('main-screen').style.display = 'flex';
                 }, 3000);
             }
         }, 1000);
