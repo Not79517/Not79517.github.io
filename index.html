@@ -8,10 +8,10 @@
         body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; }
         #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         
-        /* ส่วนหัว */
-        .header { background: #008040; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; color: white; }
-        .header img.logo { height: 40px; background: white; padding: 5px; border-radius: 5px; }
-        .header img.allmember { height: 30px; }
+        /* ส่วนหัว (เอาโลโก้ซ้ายบนออกแล้ว) */
+        .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; }
+        .header h2 { margin: 0; }
+        .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
         /* ส่วนป้ายโปรโมชั่น */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; }
@@ -29,7 +29,6 @@
         .screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: white; display: none; flex-direction: column; z-index: 10; 
-            /* กำหนดให้ตอนโผล่มามี effect เลื่อนจากขวามาซ้าย และค่อยๆ ชัดขึ้น */
             animation: slideIn 0.3s ease-out forwards;
         }
         
@@ -70,17 +69,19 @@
 </head>
 <body>
 
+<!-- เพิ่มแท็ก Audio สำหรับเล่นเสียง -->
+<audio id="paySound" src="pay-sound.m4a"></audio>
+
 <div id="kiosk">
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
-            <!-- แก้ไขรูป 7-11 ตรงนี้ให้สมบูรณ์ -->
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/1024px-7-eleven_logo.svg.png" class="logo" alt="7-11">
             <h2>เลือกสินค้า</h2>
             <img src="logo-allmember.png" class="allmember" alt="All Member">
         </div>
         
         <div class="promos">
-            <img src="promo-711.png" onerror="this.onerror=null; this.src='promo-711.jfif';">
+            <!-- ใส่รูปใหม่เข้าไปแทน -->
+            <img src="ad-image.jfif">
             <img src="promo-allmember.jfif">
         </div>
 
@@ -152,26 +153,24 @@
 </div>
 
 <script>
+    // ดึง Element เสียงมาเก็บไว้
+    const paySound = document.getElementById('paySound');
+
     function openPayment(itemName) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
-        
-        // ทำให้หน้าใหม่แสดงผล (มันจะมีอนิเมชั่นเลื่อนเข้ามาอัตโนมัติเพราะ CSS)
         document.getElementById('payment-screen').style.display = 'flex';
     }
 
     function goBack() {
-        // ปิดหน้าชำระเงิน กลับไปหน้าหลัก
         document.getElementById('payment-screen').style.display = 'none';
     }
 
     function startProcess(method) {
-        // ซ่อนหน้าชำระเงิน และเปิดหน้า QR/ประมวลผล (จะค่อยๆ สว่างขึ้นมา)
         document.getElementById('payment-screen').style.display = 'none';
         
-        // ลบอนิเมชั่นเก่าก่อน เพื่อให้มันเล่นซ้ำได้ถ้ากดหลายรอบ
         let processScreen = document.getElementById('processing-screen');
         processScreen.style.animation = 'none';
-        processScreen.offsetHeight; /* Trigger reflow */
+        processScreen.offsetHeight; 
         processScreen.style.animation = null; 
         
         processScreen.style.display = 'flex';
@@ -202,6 +201,10 @@
                 document.getElementById('qr-display').style.display = 'none';
                 document.getElementById('status-msg').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
+                
+                // เล่นเสียงตอนชำระเงินเสร็จ
+                paySound.currentTime = 0;
+                paySound.play();
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
