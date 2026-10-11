@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>7-11 Kiosk Simulation</title>
     <style>
-        body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; }
-        #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        body { margin: 0; font-family: 'Kanit', Tahoma, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; overflow: hidden; /* ป้องกันการเลื่อนหน้าจอทั้งหน้า */ }
+        #kiosk { width: 100%; max-width: 768px; height: 100vh; background: #fff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.2); overflow: hidden; }
         
-        .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; }
+        .header { background: #008040; display: flex; justify-content: center; align-items: center; padding: 10px 20px; color: white; position: relative; flex-shrink: 0; }
         .header h2 { margin: 0; font-size: 1.5em; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
         /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
-        .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; }
+        .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; flex-shrink: 0; }
         .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; flex-shrink: 0; }
-        .promos video { width: 220px; background-color: #222; }
+        /* บังคับขนาดวิดีโอให้คงที่เพื่อแก้ปัญหากล่องดำ */
+        .promos video { width: 220px; min-width: 220px; background-color: #222; } 
         
         .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
         .card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.1s;}
@@ -35,13 +36,13 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .screen-header { background: #e46c0a; color: white; padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; }
+        .screen-header { background: #e46c0a; color: white; padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; flex-shrink: 0; }
         
-        .payment-methods { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .payment-methods { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex: 1; overflow-y: auto; }
         .method-btn { display: flex; align-items: center; padding: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.2em; cursor: pointer; background: #fff; transition: 0.1s;}
         .method-btn:active { transform: scale(0.98); background: #f0f0f0;}
         .method-btn img { height: 40px; margin-right: 20px; object-fit: contain; width: 60px; }
-        .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
+        .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s; flex-shrink: 0;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
         /* หน้า Processing แบบใหม่ */
@@ -77,6 +78,15 @@
         /* วิดีโอแถบโหลด */
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
+        /* หน้าจอเริ่มต้น (แก้ปัญหา Autoplay) */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #008040; color: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 30; cursor: pointer;
+        }
+        #start-screen h1 { font-size: 2em; margin-bottom: 20px; }
+        #start-screen p { font-size: 1.2em; border: 2px solid white; padding: 10px 20px; border-radius: 20px; }
+
         @media (max-width: 480px) {
             .products { grid-template-columns: repeat(2, 1fr); }
         }
@@ -89,18 +99,24 @@
 <audio id="thxSound" src="thx.mp3"></audio>
 
 <div id="kiosk">
+    <!-- หน้าจอเริ่มต้นเพื่อแก้ปัญหาเบราว์เซอร์บล็อกการเล่นสื่ออัตโนมัติ -->
+    <div id="start-screen" onclick="startApp()">
+        <h1>ยินดีต้อนรับสู่ 7-11</h1>
+        <p>แตะที่นี่เพื่อเริ่มใช้งาน</p>
+    </div>
+
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
             <h2>เลือกสินค้า</h2>
-            <img src="logo-allmember.png" class="allmember" alt="All Member">
+            <img src="logo-allmember.png" class="allmember" alt="All Member" onerror="this.onerror=null; this.src='';">
         </div>
         
         <div class="promos">
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
-            <img src="promo-allmember.jfif">
+            <img src="promo-allmember.jfif" onerror="this.onerror=null; this.src='';">
             
-            <!-- วิดีโอโฆษณาเล่นวนลูป -->
-            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
+            <!-- วิดีโอโฆษณาเล่นวนลูป (เพิ่ม playsinline สำคัญมากสำหรับมือถือ) -->
+            <video id="adVideo" src="ad-video.mp4" loop muted playsinline></video>
         </div>
 
         <div class="products">
@@ -151,11 +167,11 @@
                 เงินสด
             </div>
             <div class="method-btn" onclick="startProcess('truemoney')">
-                <img src="logo-truemoney.png">
+                <img src="logo-truemoney.png" onerror="this.onerror=null; this.src='';">
                 TrueMoney
             </div>
             <div class="method-btn" onclick="startProcess('visa')">
-                <img src="logo-visa.png">
+                <img src="logo-visa.png" onerror="this.onerror=null; this.src='';">
                 บัตร VISA
             </div>
         </div>
@@ -164,7 +180,7 @@
 
     <div id="processing-screen" class="screen">
         <div id="status-msg" class="message">กรุณาชำระเงิน</div>
-        <img src="qr-code.jfif" id="qr-display" class="qr">
+        <img src="qr-code.jfif" id="qr-display" class="qr" onerror="this.onerror=null; this.src='';">
         
         <div class="loading-product-box" id="loading-product-box" style="display: none;">
             <img id="loading-product-img" src="">
@@ -188,10 +204,41 @@
     // ตั้งค่าให้เล่นเสียงขอบคุณต่อจากเสียงจ่ายเงินสำเร็จทันที
     paySound.onended = function() {
         thxSound.currentTime = 0;
-        thxSound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียงขอบคุณ"));
+        thxSound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียงขอบคุณ", e));
     };
 
     let currentSelectedItemImg = "";
+
+    // ฟังก์ชันเริ่มแอป (แก้ปัญหาเรื่อง Autoplay)
+    function startApp() {
+        document.getElementById('start-screen').style.display = 'none';
+        
+        // บังคับให้วิดีโอโฆษณาโหลดและเล่น
+        if (adVideo) {
+            adVideo.load();
+            let playPromise = adVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("วิดีโอโฆษณาอาจถูกบล็อกโดยเบราว์เซอร์:", error);
+                });
+            }
+        }
+
+        // ดึงเสียงมาเล่นแบบเงียบๆ ครั้งหนึ่งเพื่อให้ปลดล็อกระบบเสียง
+        paySound.volume = 0;
+        paySound.play().then(() => {
+            paySound.pause();
+            paySound.currentTime = 0;
+            paySound.volume = 1;
+        }).catch(e => console.log(e));
+        
+        thxSound.volume = 0;
+        thxSound.play().then(() => {
+            thxSound.pause();
+            thxSound.currentTime = 0;
+            thxSound.volume = 1;
+        }).catch(e => console.log(e));
+    }
 
     function openPayment(itemName, itemImage) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
@@ -207,7 +254,12 @@
         document.getElementById('payment-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'flex';
         
-        if (adVideo) { adVideo.play(); }
+        if (adVideo) { 
+            let playPromise = adVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => console.log("เล่นวิดีโอไม่ได้:", error));
+            }
+        }
     }
 
     function startProcess(method) {
@@ -236,8 +288,11 @@
             loadingVideo.src = "load-13s.mp4"; 
         }
         
-        loadingVideo.currentTime = 0;
-        loadingVideo.play().catch(e => console.log("โหลดวิดีโอโหลดหน้าจอ..."));
+        loadingVideo.load();
+        let loadPlayPromise = loadingVideo.play();
+        if (loadPlayPromise !== undefined) {
+             loadPlayPromise.catch(e => console.log("โหลดวิดีโอโหลดหน้าจอไม่ได้:", e));
+        }
         
         document.getElementById('timer-display').style.display = 'block';
         document.getElementById('status-msg').style.display = 'block';
@@ -260,14 +315,17 @@
                 
                 // เริ่มเล่นเสียงคิดเงิน (เสียงขอบคุณจะเล่นต่ออัตโนมัติ)
                 paySound.currentTime = 0;
-                paySound.play().catch(e => console.log("รอการคลิกจากผู้ใช้"));
+                let soundPromise = paySound.play();
+                if (soundPromise !== undefined) {
+                    soundPromise.catch(e => console.log("ไม่สามารถเล่นเสียงได้:", e));
+                }
                 
                 setTimeout(() => {
                     document.getElementById('processing-screen').style.display = 'none';
                     document.getElementById('main-screen').style.display = 'flex';
                     if (adVideo) {
                         adVideo.currentTime = 0;
-                        adVideo.play();
+                        adVideo.play().catch(e => console.log("เล่นวิดีโอไม่ได้:", e));
                     }
                 }, 4000); // เผื่อเวลาให้เสียงขอบคุณเล่นจบก่อนกลับหน้าแรก
             }
