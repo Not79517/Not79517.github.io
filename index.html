@@ -25,7 +25,7 @@
             grid-auto-columns: minmax(160px, 1fr);
             gap: 15px; 
             padding: 20px; 
-            overflow-x: hidden; /* ซ่อน scrollbar ให้ JS จัดการแทน */
+            overflow-x: hidden; 
             background: #fafafa; 
         }
         .card { background: white; border: 1px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;}
@@ -78,18 +78,13 @@
 
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
-        /* -------------------------------------------
-           หน้าจอเริ่มต้นแบบใหม่ (สวย ล้ำ ไม่ต้องใช้ไฟล์รูป) 
-           ------------------------------------------- */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* ไล่สีพื้นหลังแบบ 7-11 (เขียว ส้ม แดง) */
             background: linear-gradient(135deg, #008040 0%, #e46c0a 50%, #d8232a 100%);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 30; cursor: pointer;
             overflow: hidden;
         }
         
-        /* แสงวิบวับตกแต่งพื้นหลัง */
         .sparkles { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(white 1px, transparent 1px); background-size: 50px 50px; opacity: 0.2; animation: twinkle 5s linear infinite; }
         @keyframes twinkle { 0% { transform: translateY(0); } 100% { transform: translateY(-50px); } }
 
@@ -115,7 +110,6 @@
         .welcome-box h2 { color: #e46c0a; font-size: 1.5em; margin: 0 0 20px 0; font-weight: 500; }
         .welcome-box p { color: #d8232a; font-size: 1.2em; font-weight: bold; margin-bottom: 30px; }
         
-        /* สร้างโลโก้ 7-11 จำลองด้วย CSS */
         .fake-logo {
             display: inline-block; background: white; padding: 10px 20px; border-radius: 10px;
             border: 3px solid #008040; margin-bottom: 20px;
@@ -137,7 +131,6 @@
 <audio id="thxSound" src="thx.mp3"></audio>
 
 <div id="kiosk">
-    <!-- หน้าจอเริ่มต้นแบบใหม่ (สวยงามโดยไม่ต้องพึ่งไฟล์รูปภาพ) -->
     <div id="start-screen" onclick="startApp()">
         <div class="sparkles"></div>
         <div class="welcome-box">
@@ -160,12 +153,11 @@
         <div class="promos">
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
             <img src="promo-allmember.jfif" onerror="this.onerror=null; this.src='';">
-            <video id="adVideo" src="ad-video.mp4" loop muted playsinline></video>
+            <!-- พระเอกของเราอยู่ตรงนี้ครับ! แก้ชื่อเป็น promo-video.mp4 ให้แล้ว -->
+            <video id="adVideo" src="promo-video.mp4" autoplay loop muted playsinline></video>
         </div>
 
-        <!-- รายการสินค้า (ทำระบบเลื่อนซ้ายอัตโนมัติ) -->
         <div class="products" id="product-list">
-            <!-- กลุ่มสินค้าชุดที่ 1 -->
             <div class="card" onclick="openPayment('เลย์ รสออริจินัล', 'lays-yellow.png')"><img src="lays-yellow.png"><div class="title">เลย์ รสออริจินัล</div><div class="price">10 บาท</div></div>
             <div class="card" onclick="openPayment('คอนเน่', 'cornae.jfif')"><img src="cornae.jfif"><div class="title">คอนเน่</div><div class="price">10 บาท</div></div>
             <div class="card" onclick="openPayment('โลตัสขาไก่', 'lotus.jfif')"><img src="lotus.jfif"><div class="title">โลตัสขาไก่</div><div class="price">10 บาท</div></div>
@@ -219,7 +211,6 @@
     const loadingVideo = document.getElementById('loading-video-player');
     const productList = document.getElementById('product-list');
     
-    // ตั้งค่าเสียงขอบคุณให้เล่นต่อจากเสียงคิดเงิน
     paySound.onended = function() {
         thxSound.currentTime = 0;
         thxSound.play().catch(e => console.log(e));
@@ -227,17 +218,14 @@
 
     let currentSelectedItemImg = "";
 
-    // ระบบเลื่อนสินค้าไปทางซ้ายอัตโนมัติและวนลูป
-    // คัดลอกสินค้าทั้งหมดอีก 1 ชุดเพื่อให้วนลูปเนียนๆ
     productList.innerHTML += productList.innerHTML; 
-    let scrollSpeed = 1; // ความเร็วในการเลื่อน (ยิ่งน้อยยิ่งช้า)
+    let scrollSpeed = 1; 
     let autoScrollInterval;
 
     function startAutoScroll() {
         autoScrollInterval = setInterval(() => {
             if (document.getElementById('main-screen').style.display !== 'none') {
                 productList.scrollLeft += scrollSpeed;
-                // ถ้าเลื่อนไปจนสุดความยาวชุดแรกแล้ว ให้เด้งกลับมาเริ่มต้นใหม่แบบเนียนๆ
                 if (productList.scrollLeft >= productList.scrollWidth / 2) {
                     productList.scrollLeft = 0;
                 }
@@ -245,7 +233,6 @@
         }, 30);
     }
 
-    // หยุดเลื่อนเมื่อผู้ใช้เอานิ้ว/เมาส์ไปแตะ เพื่อให้กดเลือกสินค้าได้ง่ายขึ้น
     productList.addEventListener('touchstart', () => clearInterval(autoScrollInterval));
     productList.addEventListener('touchend', startAutoScroll);
     productList.addEventListener('mouseenter', () => clearInterval(autoScrollInterval));
@@ -262,11 +249,9 @@
             }
         }
 
-        // ปลดล็อกระบบเสียง
         paySound.volume = 0; paySound.play().then(() => { paySound.pause(); paySound.currentTime = 0; paySound.volume = 1; }).catch(e=>{});
         thxSound.volume = 0; thxSound.play().then(() => { thxSound.pause(); thxSound.currentTime = 0; thxSound.volume = 1; }).catch(e=>{});
         
-        // เริ่มระบบเลื่อนสินค้าอัตโนมัติ
         startAutoScroll();
     }
 
@@ -352,7 +337,5 @@
         }, 1000);
     }
 </script>
-</body>
-</html>
 </body>
 </html>
