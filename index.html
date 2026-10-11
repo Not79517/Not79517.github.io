@@ -12,9 +12,10 @@
         .header h2 { margin: 0; font-size: 1.5em; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
-        /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
+        /* แก้ไขส่วนโปรโมชั่น: ล็อคขนาดวิดีโอไม่ให้โดนบีบหายไป */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; }
-        .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; }
+        .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; flex-shrink: 0; }
+        .promos video { width: 220px; background-color: #222; }
         
         .products { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; overflow-y: auto; background: #fafafa; }
         .card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.1s;}
@@ -43,7 +44,6 @@
         .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
-        /* หน้า Processing แบบใหม่ */
         #processing-screen { 
             background: rgba(30,30,30,0.95); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
             animation: fadeIn 0.4s ease-out forwards;
@@ -59,7 +59,6 @@
         .message { font-size: 1.5em; margin: 10px; }
         .success-text { font-size: 2.5em; color: #4caf50; font-weight: bold; display: none; }
         
-        /* กรอบโชว์สินค้าที่กำลังโหลด (สีแดง) */
         .loading-product-box {
             background: rgba(255, 0, 0, 0.1);
             border: 3px solid #ff3b3b;
@@ -73,7 +72,6 @@
         .loading-product-box img { height: 100px; object-fit: contain; }
         .loading-product-box p { margin: 10px 0 0 0; color: #ffeb3b; font-size: 1.2em; font-weight: bold; }
 
-        /* วิดีโอแถบโหลด */
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
         @media (max-width: 480px) {
@@ -93,13 +91,10 @@
         </div>
         
         <div class="promos">
-            <!-- 1. รูปโฆษณาอันเก่า (กันเหนียว ดึงได้ทั้ง ad.jfif และ promo-711.png) -->
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
-            
-            <!-- 2. รูปชินจัง -->
             <img src="promo-allmember.jfif">
             
-            <!-- 3. วิดีโอโฆษณาม่อนชิชิ -->
+            <!-- วิดีโอโฆษณา -->
             <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
         </div>
 
@@ -166,7 +161,6 @@
         <div id="status-msg" class="message">กรุณาชำระเงิน</div>
         <img src="qr-code.jfif" id="qr-display" class="qr">
         
-        <!-- กรอบโชว์สินค้าที่เลือก (สีแดง) -->
         <div class="loading-product-box" id="loading-product-box" style="display: none;">
             <img id="loading-product-img" src="">
             <p>สินค้ากำลังจัดเตรียม...</p>
@@ -174,7 +168,6 @@
 
         <div id="timer-display" class="timer">8</div>
         
-        <!-- แถบวิดีโอโหลดรถมอเตอร์ไซค์ -->
         <video id="loading-video-player" muted playsinline></video>
 
         <div id="success-msg" class="success-text">รับสินค้าที่ช่องรับสินค้า</div>
@@ -232,7 +225,7 @@
         }
         
         loadingVideo.currentTime = 0;
-        loadingVideo.play();
+        loadingVideo.play().catch(e => console.log("โหลดวิดีโอ..."));
         
         document.getElementById('timer-display').style.display = 'block';
         document.getElementById('status-msg').style.display = 'block';
@@ -268,7 +261,5 @@
         }, 1000);
     }
 </script>
-</body>
-</html>
 </body>
 </html>
