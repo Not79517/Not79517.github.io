@@ -12,7 +12,6 @@
         .header h2 { margin: 0; font-size: 1.5em; }
         .header img.allmember { height: 30px; position: absolute; right: 20px; }
         
-        /* ส่วนป้ายโปรโมชั่นและวิดีโอโฆษณา */
         .promos { display: flex; overflow-x: auto; padding: 10px; background: #fff8e1; border-bottom: 2px solid #ddd; align-items: center; flex-shrink: 0; }
         .promos img, .promos video { height: 120px; margin-right: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover; flex-shrink: 0; }
         .promos video { width: 220px; min-width: 220px; background-color: #222; } 
@@ -44,7 +43,6 @@
         .back-btn { margin: auto 20px 20px 20px; padding: 15px; background: #999; color: white; text-align: center; border-radius: 10px; font-size: 1.2em; cursor: pointer; transition: 0.1s; flex-shrink: 0;}
         .back-btn:active { transform: scale(0.98); background: #777;}
         
-        /* หน้า Processing แบบใหม่ */
         #processing-screen { 
             background: rgba(30,30,30,0.95); color: white; justify-content: center; align-items: center; text-align: center; z-index: 20;
             animation: fadeIn 0.4s ease-out forwards;
@@ -60,7 +58,6 @@
         .message { font-size: 1.5em; margin: 10px; }
         .success-text { font-size: 2.5em; color: #4caf50; font-weight: bold; display: none; }
         
-        /* กรอบโชว์สินค้าที่กำลังโหลด (สีแดง) */
         .loading-product-box {
             background: rgba(255, 0, 0, 0.1);
             border: 3px solid #ff3b3b;
@@ -74,9 +71,16 @@
         .loading-product-box img { height: 100px; object-fit: contain; }
         .loading-product-box p { margin: 10px 0 0 0; color: #ffeb3b; font-size: 1.2em; font-weight: bold; }
 
-        /* วิดีโอแถบโหลด */
         #loading-video-player { width: 90%; max-width: 350px; border-radius: 10px; margin-top: 10px; display: none; }
         
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #008040; color: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 30; cursor: pointer;
+        }
+        #start-screen h1 { font-size: 2em; margin-bottom: 20px; }
+        #start-screen p { font-size: 1.2em; border: 2px solid white; padding: 10px 20px; border-radius: 20px; }
+
         @media (max-width: 480px) {
             .products { grid-template-columns: repeat(2, 1fr); }
         }
@@ -88,6 +92,11 @@
 <audio id="thxSound" src="thx.mp3"></audio>
 
 <div id="kiosk">
+    <div id="start-screen" onclick="startApp()">
+        <h1>ยินดีต้อนรับสู่ 7-11</h1>
+        <p>แตะที่นี่เพื่อเริ่มใช้งาน</p>
+    </div>
+
     <div id="main-screen" style="display: flex; flex-direction: column; height: 100%;">
         <div class="header">
             <h2>เลือกสินค้า</h2>
@@ -98,8 +107,8 @@
             <img src="ad.jfif" onerror="this.onerror=null; this.src='promo-711.png';">
             <img src="promo-allmember.jfif" onerror="this.onerror=null; this.src='';">
             
-            <!-- วิดีโอโฆษณาเล่นวนลูปอัตโนมัติแบบปิดเสียง -->
-            <video id="adVideo" src="ad-video.mp4" autoplay loop muted playsinline></video>
+            <!-- เปลี่ยนชื่อไฟล์วิดีโอเป็น promo-video.mp4 และใส่รูป poster -->
+            <video id="adVideo" src="promo-video.mp4" poster="promo-711.png" autoplay loop muted playsinline></video>
         </div>
 
         <div class="products">
@@ -184,13 +193,40 @@
     const adVideo = document.getElementById('adVideo');
     const loadingVideo = document.getElementById('loading-video-player');
     
-    // ตั้งค่าให้เล่นเสียงขอบคุณต่อจากเสียงจ่ายเงินสำเร็จทันที
     paySound.onended = function() {
         thxSound.currentTime = 0;
         thxSound.play().catch(e => console.log("รอการคลิกจากผู้ใช้ก่อนเล่นเสียงขอบคุณ", e));
     };
 
     let currentSelectedItemImg = "";
+
+    function startApp() {
+        document.getElementById('start-screen').style.display = 'none';
+        
+        if (adVideo) {
+            adVideo.load();
+            let playPromise = adVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("วิดีโอโฆษณาอาจถูกบล็อกโดยเบราว์เซอร์:", error);
+                });
+            }
+        }
+
+        paySound.volume = 0;
+        paySound.play().then(() => {
+            paySound.pause();
+            paySound.currentTime = 0;
+            paySound.volume = 1;
+        }).catch(e => console.log(e));
+        
+        thxSound.volume = 0;
+        thxSound.play().then(() => {
+            thxSound.pause();
+            thxSound.currentTime = 0;
+            thxSound.volume = 1;
+        }).catch(e => console.log(e));
+    }
 
     function openPayment(itemName, itemImage) {
         document.getElementById('selected-item-name').innerText = "รายการ: " + itemName;
@@ -265,7 +301,6 @@
                 
                 document.getElementById('success-msg').style.display = 'block';
                 
-                // เริ่มเล่นเสียงคิดเงิน (เสียงขอบคุณจะเล่นต่ออัตโนมัติ)
                 paySound.currentTime = 0;
                 let soundPromise = paySound.play();
                 if (soundPromise !== undefined) {
@@ -279,7 +314,7 @@
                         adVideo.currentTime = 0;
                         adVideo.play().catch(e => console.log("เล่นวิดีโอไม่ได้:", e));
                     }
-                }, 4000); // เผื่อเวลาให้เสียงขอบคุณเล่นจบก่อนกลับหน้าแรก
+                }, 4000); 
             }
         }, 1000);
     }
